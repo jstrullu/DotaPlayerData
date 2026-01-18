@@ -1,36 +1,99 @@
+<<<<<<< HEAD
 ﻿@using DotaPlayerData.Core
+=======
+@using DotaPlayerData.Core
+>>>>>>> integrating-stratz
 @using DotaPlayerData.Core.Models.OpenDota
 
 <div>
-    @if (SearchPlayerResults != null)
+    @if (SearchPlayerResults != null && SearchPlayerResults.Any())
     {
+<<<<<<< HEAD
         <MudList T="SearchPlayerResult" SelectionMode="SelectionMode.SingleSelection" Color="Color.Success">
 
+=======
+        <MudGrid Spacing="2">
+>>>>>>> integrating-stratz
             @foreach (var player in SearchPlayerResults)
             {
-                <MudListItem Value="player.AccountId" Class="player-list-item" OnClick="() => LoadPlayerData(player.AccountId)">
-                    <MudStack Row="true">
-                    <MudImage Src="@player.AvatarFull" Class="rounded-lg" Width="50" Height="50" Elevation="25"/>
-                    <MudText>@player.PersonaName</MudText>
-                    </MudStack>
-                </MudListItem>
+                <MudItem xs="12" sm="6" md="4" lg="3">
+                    <MudCard Elevation="2"
+                             Class="cursor-pointer hover-card"
+                             Style="transition: all 0.2s ease-in-out;"
+                             @onclick="() => LoadPlayerData(player.AccountId)">
+                        <MudCardContent Class="pa-3">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3">
+                                <MudAvatar Size="Size.Large">
+                                    @if (!string.IsNullOrEmpty(player.AvatarFull))
+                                    {
+                                        <MudImage Src="@player.AvatarFull"/>
+                                    }
+                                    else
+                                    {
+                                        <MudIcon Icon="@Icons.Material.Filled.Person"/>
+                                    }
+                                </MudAvatar>
+                                <MudStack Spacing="0" Style="overflow: hidden;">
+                                    <MudText Typo="Typo.subtitle1"
+                                             Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        @player.PersonaName
+                                    </MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        ID: @player.AccountId
+                                    </MudText>
+                                    @if (!string.IsNullOrEmpty(player.LastMatchTime) && DateTime.TryParse(player.LastMatchTime, out var lastMatch))
+                                    {
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                            Last match: @lastMatch.ToString("MMM dd, yyyy")
+                                        </MudText>
+                                    }
+                                </MudStack>
+                            </MudStack>
+                        </MudCardContent>
+                        <MudCardActions Class="pa-2 pt-0">
+                            <MudButton Variant="Variant.Text"
+                                       Color="Color.Primary"
+                                       Size="Size.Small"
+                                       EndIcon="@Icons.Material.Filled.ArrowForward">
+                                View Profile
+                            </MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
             }
-        </MudList>
+        </MudGrid>
+    }
+    else
+    {
+        <MudAlert Severity="Severity.Info">No players found matching your search.</MudAlert>
     }
 </div>
+
+<style>
+    .hover-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+</style>
 
 @code {
     [Parameter]
     public IEnumerable<SearchPlayerResult> SearchPlayerResults { get; set; }
-    
+
     [Parameter]
     public Action<int> OnPlayerSelected { get; set; }
+<<<<<<< HEAD
     
     MudListItem<SearchPlayerResult> _selectedItem;
+=======
+>>>>>>> integrating-stratz
 
     private void LoadPlayerData(int playerAccountId)
     {
-        OnPlayerSelected.Invoke(playerAccountId);
+        OnPlayerSelected?.Invoke(playerAccountId);
     }
-
 }

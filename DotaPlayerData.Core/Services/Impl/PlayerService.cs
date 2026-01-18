@@ -6,12 +6,19 @@ using DotaPlayerData.Core.Models.OpenDota;
 using DotaPlayerData.Core.Models.Stratz;
 using Profile = DotaPlayerData.Core.Models.Profile;
 using Team = DotaPlayerData.Core.Models.Team;
+<<<<<<< HEAD
 using Flurl.Http;
+=======
+>>>>>>> integrating-stratz
 
 [assembly:InternalsVisibleTo("DotaPlayerData.Tests")]
 namespace DotaPlayerData.Core.Services.Impl;
 
+<<<<<<< HEAD
 public class PlayerService(IOpenDotaApiClient openDotaApiClient, IStratzApi stratzApi, ITeamService teamService) : IPlayerService
+=======
+public class PlayerService(IOpenDotaApiClient openDotaApiClient, IStratzApi stratzApi) : IPlayerService
+>>>>>>> integrating-stratz
 {
 
     public async Task<List<SearchPlayerResult>> SearchPlayer(string name)
@@ -44,7 +51,25 @@ public class PlayerService(IOpenDotaApiClient openDotaApiClient, IStratzApi stra
         return GetMergedPlayerInfos(stratzPlayer, openDotaPlayer);
     }
 
+<<<<<<< HEAD
     internal static Player GetMergedPlayerInfos(StratzPlayer stratzPlayer, OpenDotaPlayer openDotaPlayer)
+=======
+    public async Task<List<Peer>> GetPlayerPeers(long steamId)
+    {
+        try
+        {
+            var result = await openDotaApiClient.GetPlayerPeers(steamId).ConfigureAwait(false);
+            var peers = JsonSerializer.Deserialize<List<Peer>>(result) ?? new List<Peer>();
+            return peers.Where(p => p.WithGames > 0).OrderByDescending(p => p.WithGames).ToList();
+        }
+        catch (JsonException e)
+        {
+            throw;
+        }
+    }
+
+    private Player GetMergedPlayerInfos(StratzPlayer stratzPlayer, OpenDotaPlayer openDotaPlayer)
+>>>>>>> integrating-stratz
     {
         return new Player
         {
@@ -61,8 +86,13 @@ public class PlayerService(IOpenDotaApiClient openDotaApiClient, IStratzApi stra
             MatchCount = stratzPlayer.MatchCount,
             Team = new Team
             {
+<<<<<<< HEAD
                 Name = stratzPlayer.Team.Team.Name,
                 Logo = stratzPlayer.Team.Team.Logo
+=======
+                Name = stratzPlayer.Team.Name,
+                Logo = stratzPlayer.Team.Logo
+>>>>>>> integrating-stratz
             }
         };
     }

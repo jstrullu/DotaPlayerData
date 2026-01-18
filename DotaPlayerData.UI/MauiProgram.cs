@@ -1,4 +1,11 @@
+<<<<<<< HEAD
 ﻿using DotaPlayerData.API;
+=======
+﻿
+
+using System.Reflection;
+using DotaPlayerData.API;
+>>>>>>> integrating-stratz
 using DotaPlayerData.API.Configuration;
 using DotaPlayerData.API.Impl;
 using DotaPlayerData.Core.Services;
@@ -19,7 +26,10 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .ConfigureFonts(fonts => { fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular"); });
+<<<<<<< HEAD
         builder.AddAppSettings();
+=======
+>>>>>>> integrating-stratz
         builder.Services.AddMauiBlazorWebView();
         builder.Services.AddMudServices();
 
@@ -31,8 +41,11 @@ public static class MauiProgram
         builder.Services.AddScoped<IHeroService, HeroService>();
         builder.Services.AddScoped<IPlayerService, PlayerService>();
         builder.Services.AddScoped<IStratzApi, StratzApi>();
+<<<<<<< HEAD
         builder.Services.AddScoped<ITeamService, TeamService>();
         builder.Services.AddScoped<IMatchService, MatchService>();
+=======
+>>>>>>> integrating-stratz
         builder.Services.AddScoped<SearchController>();
         builder.Services.AddSingleton(builder.Configuration.GetSection("Stratz").Get<StratzConfiguration>());
         builder.Services.AddSingleton(builder.Configuration.GetSection("OpenDota").Get<OpenDotaConfiguration>());

@@ -27,7 +27,11 @@ public class StratzPlayer
     [JsonPropertyName("names")]
     public List<Name> Names { get; set; }
     [JsonPropertyName("team")]
+<<<<<<< HEAD
     public TeamProfile Team { get; set; }
+=======
+    public Team Team { get; set; }
+>>>>>>> integrating-stratz
     [JsonPropertyName("behaviorScore")]
     public int BehaviorScore { get; set; }
     [JsonPropertyName("steamAccountId")]
