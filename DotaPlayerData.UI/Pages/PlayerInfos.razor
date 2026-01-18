@@ -1,37 +1,138 @@
-﻿@using DotaPlayerData.Core.Models
-<div>
-    <MudCard>
-        <MudCardContent>
-            <MudGrid Justify="Justify.FlexStart" Spacing="5">
-                <MudItem>
-                    <div style="position: relative; text-align: left">
-                        <MudImage Src="@PlayerData.Profile.Avatar" Elevation="30" Class="rounded-lg"/>  
-                        <div style="position: absolute; top: 0; left: 0;">
-                            <MudImage Src="@_rankUrl" Height="60"/>
-                        </div>
-                        <div style="position: absolute; top:0; left: 0;">
-                            <MudImage Src="@_starsUrl" Height="60"/>
+@using DotaPlayerData.Core.Models
+
+<MudGrid Spacing="4">
+    <MudItem xs="12" md="4">
+        <MudCard Elevation="3" Class="h-100">
+            <MudCardContent>
+                <MudStack AlignItems="AlignItems.Center" Spacing="3">
+                    <div style="position: relative;">
+                        <MudAvatar Size="Size.Large" Style="width: 120px; height: 120px;">
+                            <MudImage Src="@PlayerData.Profile.Avatar"/>
+                        </MudAvatar>
+                        <div style="position: absolute; bottom: -10px; right: -10px;">
+                            <div style="position: relative; width: 60px; height: 60px;">
+                                <MudImage Src="@_rankUrl" Style="position: absolute; width: 60px; height: 60px;"/>
+                                <MudImage Src="@_starsUrl" Style="position: absolute; width: 60px; height: 60px;"/>
+                            </div>
                         </div>
                     </div>
-                </MudItem>
-                <MudItem>
-                    <MudImage Src="@_flagUrl"/>
-                    <MudText>@PlayerData.Profile.Name</MudText>
-                    <MudText>Match count : @PlayerData.MatchCount</MudText>
-                    <MudText>Win count : @PlayerData.WinCount</MudText>
-                    <MudText>Loss count : @PlayerData.LossCount</MudText>
-                </MudItem>
-                <MudItem>
-                    <MudText>Also known as :</MudText>
-                    @foreach (var name in PlayerData.Profile.AllNames)
-                    {
-                        <MudText>- @name</MudText>
-                    }
-                </MudItem>
-            </MudGrid>
-        </MudCardContent>
-    </MudCard>
-</div>
+                    <MudStack Spacing="1" AlignItems="AlignItems.Center">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            @if (!string.IsNullOrEmpty(PlayerData.CountryCode))
+                            {
+                                <MudImage Src="@_flagUrl" Width="24"/>
+                            }
+                            <MudText Typo="Typo.h5">@PlayerData.Profile.Name</MudText>
+                        </MudStack>
+                        @if (PlayerData.Team != null && !string.IsNullOrEmpty(PlayerData.Team.Name))
+                        {
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                @if (!string.IsNullOrEmpty(PlayerData.Team.Logo))
+                                {
+                                    <MudImage Src="@PlayerData.Team.Logo" Width="24" Height="24"/>
+                                }
+                                <MudText Typo="Typo.subtitle2" Color="Color.Secondary">@PlayerData.Team.Name</MudText>
+                            </MudStack>
+                        }
+                    </MudStack>
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="4">
+        <MudCard Elevation="3" Class="h-100">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Match Statistics</MudText>
+                </CardHeaderContent>
+                <CardHeaderActions>
+                    <MudIcon Icon="@Icons.Material.Filled.BarChart" Color="Color.Primary"/>
+                </CardHeaderActions>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudStack Spacing="3">
+                    <MudStack Row="true" Justify="Justify.SpaceBetween">
+                        <MudText>Total Matches</MudText>
+                        <MudText Typo="Typo.h6">@PlayerData.MatchCount.ToString("N0")</MudText>
+                    </MudStack>
+
+                    <MudDivider/>
+
+                    <MudGrid>
+                        <MudItem xs="6">
+                            <MudStack AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h4" Color="Color.Success">@PlayerData.WinCount.ToString("N0")</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Wins</MudText>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudStack AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h4" Color="Color.Error">@PlayerData.LossCount.ToString("N0")</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Losses</MudText>
+                            </MudStack>
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudDivider/>
+
+                    <MudStack Spacing="1">
+                        <MudStack Row="true" Justify="Justify.SpaceBetween">
+                            <MudText>Win Rate</MudText>
+                            <MudText Typo="Typo.subtitle1" Color="@GetWinRateColor()">
+                                @_winRate.ToString("F1")%
+                            </MudText>
+                        </MudStack>
+                        <MudProgressLinear Color="@GetWinRateColor()"
+                                           Value="@_winRate"
+                                           Rounded="true"
+                                           Size="Size.Medium"/>
+                    </MudStack>
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="4">
+        <MudCard Elevation="3" Class="h-100">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Also Known As</MudText>
+                </CardHeaderContent>
+                <CardHeaderActions>
+                    <MudIcon Icon="@Icons.Material.Filled.History" Color="Color.Primary"/>
+                </CardHeaderActions>
+            </MudCardHeader>
+            <MudCardContent>
+                @if (PlayerData.Profile.AllNames != null && PlayerData.Profile.AllNames.Any())
+                {
+                    <MudStack Spacing="1">
+                        @foreach (var name in PlayerData.Profile.AllNames.Take(10))
+                        {
+                            <MudChip T="string"
+                                     Variant="Variant.Outlined"
+                                     Size="Size.Small"
+                                     Color="Color.Default">
+                                @name
+                            </MudChip>
+                        }
+                        @if (PlayerData.Profile.AllNames.Count > 10)
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                +@(PlayerData.Profile.AllNames.Count - 10) more names...
+                            </MudText>
+                        }
+                    </MudStack>
+                }
+                else
+                {
+                    <MudText Color="Color.Secondary">No previous names recorded</MudText>
+                }
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
 @code {
     [Parameter]
     public Player PlayerData { get; set; }
@@ -39,13 +140,25 @@
     private string _flagUrl;
     private string _rankUrl;
     private string _starsUrl;
+    private double _winRate;
 
     protected override void OnParametersSet()
     {
         _flagUrl = "https://flagsapi.com/" + PlayerData.CountryCode + "/shiny/32.png";
         _rankUrl = "https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_" + (int)PlayerData.MainRank + ".png";
         _starsUrl = "https://www.opendota.com/assets/images/dota2/rank_icons/rank_star_" + PlayerData.RankStars + ".png";
+        _winRate = PlayerData.MatchCount > 0 ? (double)PlayerData.WinCount / PlayerData.MatchCount * 100 : 0;
         base.OnParametersSet();
     }
 
+    private Color GetWinRateColor()
+    {
+        return _winRate switch
+        {
+            >= 55 => Color.Success,
+            >= 50 => Color.Info,
+            >= 45 => Color.Warning,
+            _ => Color.Error
+        };
+    }
 }

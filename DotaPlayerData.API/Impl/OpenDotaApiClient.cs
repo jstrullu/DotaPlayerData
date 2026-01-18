@@ -1,22 +1,17 @@
-﻿using DotaPlayerData.API.Configuration;
+using DotaPlayerData.API.Configuration;
 using Flurl;
 using Flurl.Http;
 
 namespace DotaPlayerData.API.Impl;
 
-// All the code in this file is included in all platforms.
 public class OpenDotaApiClient(OpenDotaConfiguration openDotaConfiguration) : IOpenDotaApiClient
 {
-
     public async Task<string> GetAllDotaHeroes()
     {
         try
         {
             string heroesEndPoint = openDotaConfiguration.BaseUrl.AppendPathSegment("heroes");
-
-            var response = await heroesEndPoint.GetAsync().ConfigureAwait(false);
-
-            return await response.GetStringAsync().ConfigureAwait(false);
+            return await heroesEndPoint.GetStringAsync().ConfigureAwait(false);
         }
         catch (FlurlHttpException ex)
         {
@@ -29,10 +24,7 @@ public class OpenDotaApiClient(OpenDotaConfiguration openDotaConfiguration) : IO
         try
         {
             string matchEndpoint = openDotaConfiguration.BaseUrl.AppendPathSegment($"players/{steamId}/matches");
-
-            var response = await matchEndpoint.GetAsync().ConfigureAwait(false);
-
-            return await response.GetStringAsync().ConfigureAwait(false);
+            return await matchEndpoint.GetStringAsync().ConfigureAwait(false);
         }
         catch (FlurlHttpException e)
         {
@@ -45,10 +37,7 @@ public class OpenDotaApiClient(OpenDotaConfiguration openDotaConfiguration) : IO
         try
         {
             string playerEndpoint = openDotaConfiguration.BaseUrl.AppendPathSegment($"players/{steamId}");
-
-            var response = await playerEndpoint.GetAsync().ConfigureAwait(false);
-        
-            return await response.GetStringAsync().ConfigureAwait(false);
+            return await playerEndpoint.GetStringAsync().ConfigureAwait(false);
         }
         catch (FlurlHttpException e)
         {
@@ -61,9 +50,20 @@ public class OpenDotaApiClient(OpenDotaConfiguration openDotaConfiguration) : IO
         try
         {
             string searchEndpoint = openDotaConfiguration.BaseUrl.AppendPathSegment("search").SetQueryParam("q", name);
-            var response = await searchEndpoint.GetAsync().ConfigureAwait(false);
+            return await searchEndpoint.GetStringAsync().ConfigureAwait(false);
+        }
+        catch (FlurlHttpException e)
+        {
+            throw;
+        }
+    }
 
-            return await response.GetStringAsync().ConfigureAwait(false);
+    public async Task<string> GetPlayerPeers(long steamId)
+    {
+        try
+        {
+            string peersEndpoint = openDotaConfiguration.BaseUrl.AppendPathSegment($"players/{steamId}/peers");
+            return await peersEndpoint.GetStringAsync().ConfigureAwait(false);
         }
         catch (FlurlHttpException e)
         {

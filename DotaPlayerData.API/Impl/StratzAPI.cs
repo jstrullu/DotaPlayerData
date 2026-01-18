@@ -1,4 +1,4 @@
-﻿using DotaPlayerData.API.Configuration;
+using DotaPlayerData.API.Configuration;
 using Flurl;
 using Flurl.Http;
 
@@ -11,9 +11,10 @@ public class StratzApi(StratzConfiguration stratzConfiguration) : IStratzApi
         try
         {
             string playerEndpoint = stratzConfiguration.BaseUrl.AppendPathSegment($"player/{steamId}");
-
-            var response = await playerEndpoint.WithOAuthBearerToken(stratzConfiguration.ApiKey).GetAsync().ConfigureAwait(false);
-            return await response.GetStringAsync().ConfigureAwait(false);
+            return await playerEndpoint
+                .WithOAuthBearerToken(stratzConfiguration.ApiKey)
+                .GetStringAsync()
+                .ConfigureAwait(false);
         }
         catch (FlurlHttpException e)
         {

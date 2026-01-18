@@ -1,0 +1,191 @@
+@using DotaPlayerData.UI.Data
+@using DotaPlayerData.Core.Models.OpenDota
+@inject SearchController SearchController
+
+<div>
+    @if (_isLoading)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-4"/>
+        <MudText>Loading teammates...</MudText>
+    }
+    else if (_peers == null || !_peers.Any())
+    {
+        <MudAlert Severity="Severity.Info">No teammate data available for this player.</MudAlert>
+    }
+    else
+    {
+        <MudText Typo="Typo.subtitle1" Class="mb-3">
+            Players you've played with (sorted by games together)
+        </MudText>
+
+        <MudDataGrid Items="@_peers"
+                     Dense="true"
+                     Hover="true"
+                     Striped="true"
+                     Filterable="true"
+                     FilterMode="DataGridFilterMode.Simple"
+                     SortMode="SortMode.Multiple">
+            <Columns>
+                <TemplateColumn Title="Player" Sortable="false">
+                    <CellTemplate>
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            @if (!string.IsNullOrEmpty(context.Item.AvatarFull))
+                            {
+                                <MudAvatar Size="Size.Small">
+                                    <MudImage Src="@context.Item.AvatarFull"/>
+                                </MudAvatar>
+                            }
+                            else
+                            {
+                                <MudAvatar Size="Size.Small" Color="Color.Secondary">
+                                    <MudIcon Icon="@Icons.Material.Filled.Person"/>
+                                </MudAvatar>
+                            }
+                            <MudText>@(context.Item.PersonaName ?? "Unknown")</MudText>
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+                <PropertyColumn Property="x => x.WithGames" Title="Games Together" />
+                <PropertyColumn Property="x => x.WithWin" Title="Wins" />
+                <PropertyColumn Property="x => x.LossCount" Title="Losses" />
+                <TemplateColumn Title="Win Rate" SortBy="@(x => x.WinRate)">
+                    <CellTemplate>
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            <MudProgressLinear Color="@GetWinRateColor(context.Item.WinRate)"
+                                               Value="@context.Item.WinRate"
+                                               Style="width: 80px; height: 10px;"
+                                               Rounded="true"/>
+                            <MudText Typo="Typo.body2"
+                                     Color="@GetWinRateTextColor(context.Item.WinRate)">
+                                @context.Item.WinRate.ToString("F1")%
+                            </MudText>
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="Last Played">
+                    <CellTemplate>
+                        @if (context.Item.LastPlayed.HasValue && context.Item.LastPlayed.Value > 0)
+                        {
+                            var date = DateTimeOffset.FromUnixTimeSeconds(context.Item.LastPlayed.Value).DateTime;
+                            <MudText Typo="Typo.body2">@date.ToString("MMM dd, yyyy")</MudText>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Unknown</MudText>
+                        }
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="Peer" PageSizeOptions="@(new[] { 10, 25, 50 })"/>
+            </PagerContent>
+        </MudDataGrid>
+
+        <MudDivider Class="my-4"/>
+
+        <MudText Typo="Typo.h6" Class="mb-3">Top Teammates by Win Rate (min. 5 games)</MudText>
+        <MudGrid>
+            @foreach (var peer in _topTeammates)
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Elevation="2" Class="pa-3">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3">
+                            @if (!string.IsNullOrEmpty(peer.AvatarFull))
+                            {
+                                <MudAvatar Size="Size.Large">
+                                    <MudImage Src="@peer.AvatarFull"/>
+                                </MudAvatar>
+                            }
+                            else
+                            {
+                                <MudAvatar Size="Size.Large" Color="Color.Secondary">
+                                    <MudIcon Icon="@Icons.Material.Filled.Person"/>
+                                </MudAvatar>
+                            }
+                            <MudStack Spacing="0">
+                                <MudText Typo="Typo.subtitle2">@(peer.PersonaName ?? "Unknown")</MudText>
+                                <MudText Typo="Typo.body2">@peer.WithGames games together</MudText>
+                                <MudChip T="string"
+                                         Color="@GetWinRateChipColor(peer.WinRate)"
+                                         Size="Size.Small">
+                                    @peer.WinRate.ToString("F1")% Win Rate
+                                </MudChip>
+                            </MudStack>
+                        </MudStack>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public long SteamId { get; set; }
+
+    private List<Peer> _peers;
+    private List<Peer> _topTeammates;
+    private bool _isLoading = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SteamId > 0)
+        {
+            await LoadPeers();
+        }
+    }
+
+    private async Task LoadPeers()
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            _peers = await SearchController.GetPlayerPeers(SteamId);
+            _topTeammates = _peers
+                .Where(p => p.WithGames >= 5)
+                .OrderByDescending(p => p.WinRate)
+                .Take(6)
+                .ToList();
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private Color GetWinRateColor(double winRate)
+    {
+        return winRate switch
+        {
+            >= 60 => Color.Success,
+            >= 50 => Color.Info,
+            >= 40 => Color.Warning,
+            _ => Color.Error
+        };
+    }
+
+    private Color GetWinRateTextColor(double winRate)
+    {
+        return winRate switch
+        {
+            >= 60 => Color.Success,
+            >= 50 => Color.Default,
+            >= 40 => Color.Warning,
+            _ => Color.Error
+        };
+    }
+
+    private Color GetWinRateChipColor(double winRate)
+    {
+        return winRate switch
+        {
+            >= 60 => Color.Success,
+            >= 50 => Color.Info,
+            >= 40 => Color.Warning,
+            _ => Color.Error
+        };
+    }
+}

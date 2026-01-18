@@ -29,4 +29,9 @@ public class SearchController
     {
         return await _playerService.GetCurrentPlayerInfos(steamId);
     }
+
+    public async Task<List<Peer>> GetPlayerPeers(long steamId)
+    {
+        return await _playerService.GetPlayerPeers(steamId);
+    }
 }

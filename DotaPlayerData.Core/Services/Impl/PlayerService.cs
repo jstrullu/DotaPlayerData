@@ -37,6 +37,20 @@ public class PlayerService(IOpenDotaApiClient openDotaApiClient, IStratzApi stra
         return GetMergedPlayerInfos(stratzPlayer, openDotaPlayer);
     }
 
+    public async Task<List<Peer>> GetPlayerPeers(long steamId)
+    {
+        try
+        {
+            var result = await openDotaApiClient.GetPlayerPeers(steamId).ConfigureAwait(false);
+            var peers = JsonSerializer.Deserialize<List<Peer>>(result) ?? new List<Peer>();
+            return peers.Where(p => p.WithGames > 0).OrderByDescending(p => p.WithGames).ToList();
+        }
+        catch (JsonException e)
+        {
+            throw;
+        }
+    }
+
     private Player GetMergedPlayerInfos(StratzPlayer stratzPlayer, OpenDotaPlayer openDotaPlayer)
     {
         return new Player
